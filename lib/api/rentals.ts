@@ -1,4 +1,3 @@
-// lib/api/rentals.ts
 import apiClient from './client';
 import { RentalRequest, ApiResponse } from '@/types/rental';
 

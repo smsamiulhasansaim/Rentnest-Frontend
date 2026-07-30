@@ -22,13 +22,18 @@ export const useCreateRentalRequest = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateRentalRequestData) => rentalApi.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rentalRequests'] });
+    onSuccess: (response) => {
+      if (response?.success) {
+        queryClient.invalidateQueries({ queryKey: ['rentalRequests'] });
+        queryClient.invalidateQueries({ queryKey: ['properties'] });
+      }
+    },
+    onError: (error: Error) => {
+      console.error('Rental request creation error:', error);
     },
   });
 };
 
-// Landlord specific
 export const useLandlordRequests = () => {
   return useQuery({
     queryKey: ['landlordRequests'],

@@ -3,7 +3,7 @@
 import { useProperties } from '@/hooks/useProperties';
 import PropertyGrid from '@/components/Properties/PropertyGrid';
 import Link from 'next/link';
-import { ArrowRight, Home, Search, Users, Shield } from 'lucide-react';
+import { ArrowRight, Home, Search, Users, Shield, Sparkles } from 'lucide-react';
 
 export default function HomePage() {
   const { data, isLoading } = useProperties({ limit: 8 });
@@ -14,19 +14,33 @@ export default function HomePage() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
+            <div className="flex justify-center mb-6">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl">
+                <Home className="w-16 h-16" />
+              </div>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Find Your Dream Rental Property
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100">
               Browse thousands of properties, connect with landlords, and find your perfect home.
             </p>
-            <Link
-              href="/properties"
-              className="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-lg"
-            >
-              Browse Properties
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/tenant/properties"
+                className="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-lg shadow-lg"
+              >
+                Browse Properties
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-2 bg-blue-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-400 transition-colors text-lg border border-white/20"
+              >
+                Get Started
+                <Sparkles className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -36,21 +50,21 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Why Choose RentNest?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
+            <div className="text-center bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Easy Search</h3>
               <p className="text-gray-600">Find properties with advanced filters and instant search.</p>
             </div>
-            <div className="text-center">
+            <div className="text-center bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Direct Connect</h3>
               <p className="text-gray-600">Connect directly with landlords and manage rentals.</p>
             </div>
-            <div className="text-center">
+            <div className="text-center bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-blue-600" />
               </div>
@@ -67,7 +81,7 @@ export default function HomePage() {
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold">Featured Properties</h2>
             <Link
-              href="/properties"
+              href="/tenant/properties"
               className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1"
             >
               View All
@@ -93,7 +107,7 @@ export default function HomePage() {
               Get Started
             </Link>
             <Link
-              href="/properties"
+              href="/tenant/properties"
               className="border border-gray-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
             >
               Browse Properties
