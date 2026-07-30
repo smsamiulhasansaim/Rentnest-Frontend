@@ -4,27 +4,34 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { propertyApi } from '@/lib/api/properties';
-import { rentalApi } from '@/lib/api/rentals';
-import { paymentApi } from '@/lib/api/payments';
-import { Property } from '@/types/property';
+import rentalApi from '@/lib/api/rentals';
+import propertyApi from '@/lib/api/properties';
 import { RentalRequest } from '@/types/rental';
-import { Payment } from '@/types/payment';
-import PropertyCard from '@/components/tenant/PropertyCard';
-import { Home, Search, Calendar, CreditCard, Star, ArrowRight, Loader2 } from 'lucide-react';
+import { Property } from '@/types/property';
+import {
+  Home,
+  Search,
+  Calendar,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  ArrowRight,
+  Building2,
+  MapPin,
+  Bed,
+  Bath,
+  Inbox,
+  Heart,
+  Eye,
+} from 'lucide-react';
 
 export default function TenantDashboard() {
   const { user } = useAuth();
-  const [recentProperties, setRecentProperties] = useState<Property[]>([]);
-  const [recentRentals, setRecentRentals] = useState<RentalRequest[]>([]);
-  const [recentPayments, setRecentPayments] = useState<Payment[]>([]);
+  const [rentalRequests, setRentalRequests] = useState<RentalRequest[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalRentals: 0,
-    pendingRequests: 0,
-    activeRentals: 0,
-    totalPayments: 0,
-  });
 
   useEffect(() => {
     fetchDashboardData();
@@ -33,25 +40,13 @@ export default function TenantDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [propertiesRes, rentalsRes, paymentsRes] = await Promise.all([
-        propertyApi.getAll({ limit: 4 }),
-        rentalApi.getMyRequests(),
-        paymentApi.getMyPayments(),
-      ]);
+      // Get tenant's rental requests
+      const requestsRes = await rentalApi.getMyRequests();
+      setRentalRequests(requestsRes.data || []);
 
-      setRecentProperties(propertiesRes.data || []);
-      setRecentRentals(rentalsRes.data || []);
-      setRecentPayments(paymentsRes.data || []);
-
-      const rentals = rentalsRes.data || [];
-      const payments = paymentsRes.data || [];
-      
-      setStats({
-        totalRentals: rentals.length,
-        pendingRequests: rentals.filter((r) => r.status === 'PENDING').length,
-        activeRentals: rentals.filter((r) => r.status === 'ACTIVE').length,
-        totalPayments: payments.length,
-      });
+      // Get available properties
+      const propertiesRes = await propertyApi.getAll({ page: 1, limit: 6 });
+      setProperties(propertiesRes.data || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -59,47 +54,58 @@ export default function TenantDashboard() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      APPROVED: 'bg-green-100 text-green-800',
-      REJECTED: 'bg-red-100 text-red-800',
-      ACTIVE: 'bg-blue-100 text-blue-800',
-      COMPLETED: 'bg-purple-100 text-purple-800',
+  const getStatusConfig = (status: string) => {
+    const configs: Record<string, { icon: any; color: string; label: string; bg: string }> = {
+      PENDING: {
+        icon: Clock,
+        color: 'text-yellow-600',
+        label: 'Pending',
+        bg: 'bg-yellow-50',
+      },
+      APPROVED: {
+        icon: CheckCircle,
+        color: 'text-green-600',
+        label: 'Approved',
+        bg: 'bg-green-50',
+      },
+      REJECTED: {
+        icon: XCircle,
+        color: 'text-red-600',
+        label: 'Rejected',
+        bg: 'bg-red-50',
+      },
+      ACTIVE: {
+        icon: Home,
+        color: 'text-blue-600',
+        label: 'Active',
+        bg: 'bg-blue-50',
+      },
+      COMPLETED: {
+        icon: CheckCircle,
+        color: 'text-purple-600',
+        label: 'Completed',
+        bg: 'bg-purple-50',
+      },
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return configs[status] || {
+      icon: Clock,
+      color: 'text-gray-600',
+      label: status,
+      bg: 'bg-gray-50',
+    };
   };
 
-  const statsCards = [
-    {
-      title: 'Total Rentals',
-      value: stats.totalRentals,
-      icon: Home,
-      color: 'bg-blue-50 text-blue-600',
-    },
-    {
-      title: 'Pending Requests',
-      value: stats.pendingRequests,
-      icon: Calendar,
-      color: 'bg-yellow-50 text-yellow-600',
-    },
-    {
-      title: 'Active Rentals',
-      value: stats.activeRentals,
-      icon: Home,
-      color: 'bg-green-50 text-green-600',
-    },
-    {
-      title: 'Total Payments',
-      value: stats.totalPayments,
-      icon: CreditCard,
-      color: 'bg-purple-50 text-purple-600',
-    },
-  ];
+  const stats = {
+    total: rentalRequests.length,
+    pending: rentalRequests.filter((r) => r.status === 'PENDING').length,
+    approved: rentalRequests.filter((r) => r.status === 'APPROVED').length,
+    active: rentalRequests.filter((r) => r.status === 'ACTIVE').length,
+    completed: rentalRequests.filter((r) => r.status === 'COMPLETED').length,
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
@@ -109,141 +115,190 @@ export default function TenantDashboard() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       {/* Welcome Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {user?.name?.split(' ')[0] || 'Tenant'}! 👋
-        </h1>
-        <p className="text-gray-500 mt-1">Find your perfect home or manage your rentals</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Welcome back, {user?.name?.split(' ')[0] || 'Tenant'}! 🏠
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Find your perfect rental home
+            </p>
+          </div>
+          <Link
+            href="/tenant/properties"
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-600/30"
+          >
+            <Search className="w-5 h-5" />
+            Browse Properties
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {statsCards.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                </div>
-                <div className={`p-3 rounded-xl ${stat.color}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-xs text-gray-500 font-medium">Total</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-xs text-gray-500 font-medium">Pending</p>
+          <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-xs text-gray-500 font-medium">Approved</p>
+          <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-xs text-gray-500 font-medium">Active</p>
+          <p className="text-2xl font-bold text-blue-600">{stats.active}</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <p className="text-xs text-gray-500 font-medium">Completed</p>
+          <p className="text-2xl font-bold text-purple-600">{stats.completed}</p>
+        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Link
-          href="/tenant/properties"
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl p-5 hover:shadow-lg transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <Search className="w-8 h-8 mb-2" />
-              <h3 className="font-semibold text-lg">Find Properties</h3>
-              <p className="text-blue-100 text-sm">Browse available rentals</p>
-            </div>
-            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
-
-        <Link
-          href="/tenant/rentals"
-          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl p-5 hover:shadow-lg transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <Calendar className="w-8 h-8 mb-2" />
-              <h3 className="font-semibold text-lg">My Rentals</h3>
-              <p className="text-purple-100 text-sm">View rental requests</p>
-            </div>
-            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
-
-        <Link
-          href="/tenant/payments"
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl p-5 hover:shadow-lg transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <CreditCard className="w-8 h-8 mb-2" />
-              <h3 className="font-semibold text-lg">Payments</h3>
-              <p className="text-green-100 text-sm">Payment history</p>
-            </div>
-            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
-      </div>
-
-      {/* Recent Properties */}
+      {/* Recent Rental Requests */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">🏠 Recently Added Properties</h2>
-          <Link href="/tenant/properties" className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <Inbox className="w-5 h-5 text-blue-600" />
+            Your Rental Requests
+          </h2>
+          <Link
+            href="/tenant/rentals"
+            className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
+          >
             View all <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        {recentProperties.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {recentProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
+
+        {rentalRequests.length > 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+            {rentalRequests.slice(0, 5).map((request) => {
+              const config = getStatusConfig(request.status);
+              const Icon = config.icon;
+              return (
+                <Link
+                  key={request.id}
+                  href={`/tenant/rentals/${request.id}`}
+                  className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-gray-900 truncate">
+                        {request.property?.title || 'Property'}
+                      </h4>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${config.bg} ${config.color} flex items-center gap-1`}>
+                        <Icon className="w-3 h-3" />
+                        {config.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                      <MapPin className="w-4 h-4" />
+                      <span>{request.property?.city || 'N/A'}</span>
+                      <span>•</span>
+                      <DollarSign className="w-4 h-4" />
+                      <span>${request.property?.price || 0}/mo</span>
+                      <span>•</span>
+                      <Calendar className="w-4 h-4" />
+                      <span>{new Date(request.moveInDate).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                </Link>
+              );
+            })}
           </div>
         ) : (
-          <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-200">
-            <Home className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No properties available right now</p>
-            <p className="text-gray-400 text-sm">Check back later for new listings</p>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-12 text-center border border-gray-200">
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-blue-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700">No rental requests yet</h3>
+            <p className="text-gray-500 mt-2 max-w-md mx-auto">
+              Start your journey by browsing available properties and submitting a rental request.
+            </p>
+            <Link
+              href="/tenant/properties"
+              className="inline-block mt-4 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+            >
+              Browse Properties
+            </Link>
           </div>
         )}
       </div>
 
-      {/* Recent Rentals */}
+      {/* Available Properties */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">📋 Recent Rental Requests</h2>
-          <Link href="/tenant/rentals" className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-blue-600" />
+            Available Properties
+          </h2>
+          <Link
+            href="/tenant/properties"
+            className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
+          >
             View all <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        {recentRentals.length > 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-            {recentRentals.slice(0, 5).map((rental) => (
+
+        {properties.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {properties.map((property) => (
               <Link
-                key={rental.id}
-                href={`/tenant/rentals/${rental.id}`}
-                className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+                key={property.id}
+                href={`/tenant/properties/${property.id}`}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all p-5 group"
               >
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 truncate">
-                    {rental.property?.title || 'Property'}
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    {rental.property?.city || 'N/A'} • ${rental.property?.price || 0}/mo
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(rental.status)}`}>
-                    {rental.status}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                      {property.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 truncate flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      {property.city}
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                    Available
                   </span>
-                  <span className="text-sm text-gray-400">
-                    {new Date(rental.createdAt).toLocaleDateString()}
-                  </span>
-                  <ArrowRight className="w-4 h-4 text-gray-300" />
                 </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-lg font-bold text-blue-600">${property.price}</span>
+                  <span className="text-xs text-gray-400">/month</span>
+                </div>
+                <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <Bed className="w-4 h-4" />
+                    {property.bedrooms}
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Bath className="w-4 h-4" />
+                    {property.bathrooms}
+                  </span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = `/tenant/properties/${property.id}`;
+                  }}
+                  className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  View Details
+                </button>
               </Link>
             ))}
           </div>
         ) : (
           <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-200">
-            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No rental requests yet</p>
-            <p className="text-gray-400 text-sm">Browse properties and submit a request</p>
+            <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700">No properties available</h3>
+            <p className="text-gray-500 mt-2">Check back later for new listings</p>
           </div>
         )}
       </div>

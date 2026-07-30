@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { propertyApi } from '@/lib/api/properties';
+import propertyApi from '@/lib/api/properties';
 import { Property } from '@/types/property';
 import { useToast } from '@/providers/ToastProvider';
 import {
@@ -22,6 +22,7 @@ import {
   MapPin,
   Bed,
   Bath,
+  CheckCircle,
 } from 'lucide-react';
 
 export default function LandlordPropertiesPage() {

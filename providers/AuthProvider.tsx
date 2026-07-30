@@ -1,3 +1,4 @@
+// providers/AuthProvider.tsx
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -18,13 +19,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const getStoredToken = (): string | null => {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token');
+  try {
+    const token = localStorage.getItem('token');
+    return token && token !== 'undefined' ? token : null;
+  } catch {
+    return null;
+  }
 };
 
 const getStoredUser = (): User | null => {
   if (typeof window === 'undefined') return null;
-  const storedUser = localStorage.getItem('user');
-  return storedUser ? JSON.parse(storedUser) : null;
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser || storedUser === 'undefined' || storedUser === 'null') {
+      return null;
+    }
+    return JSON.parse(storedUser);
+  } catch {
+    return null;
+  }
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -33,12 +46,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Clean up invalid storage data on mount
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser === 'undefined' || storedUser === 'null') {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        setUser(null);
+        setToken(null);
+      }
+    }
+
     if (token) {
       fetchUser(token);
     } else {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUser = async (authToken: string) => {
@@ -56,13 +79,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
       const response = await authApi.login({ email, password });
-      const { token: authToken, user: userData } = response.data;
+      const { token: authToken, user: userData } = response;
 
       localStorage.setItem('token', authToken);
       localStorage.setItem('user', JSON.stringify(userData));
 
       setToken(authToken);
       setUser(userData as User);
+    } catch (error) {
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -72,13 +97,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
       const response = await authApi.register(data);
-      const { token: authToken, user: userData } = response.data;
+      const { token: authToken, user: userData } = response;
 
       localStorage.setItem('token', authToken);
       localStorage.setItem('user', JSON.stringify(userData));
 
       setToken(authToken);
       setUser(userData as User);
+    } catch (error) {
+      throw error;
     } finally {
       setIsLoading(false);
     }

@@ -4,8 +4,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { propertyApi } from '@/lib/api/properties';
-import { rentalApi } from '@/lib/api/rentals';
+import propertyApi from '@/lib/api/properties';
+import rentalApi from '@/lib/api/rentals';
 import { Property } from '@/types/property';
 import { RentalRequest } from '@/types/rental';
 import {
@@ -23,6 +23,7 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  Inbox,
 } from 'lucide-react';
 
 export default function LandlordDashboard() {
@@ -79,8 +80,11 @@ export default function LandlordDashboard() {
         activeRentals: active.length,
         totalEarnings,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
+      // Set empty arrays on error
+      setProperties([]);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -258,7 +262,10 @@ export default function LandlordDashboard() {
       {/* Recent Rental Requests */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">📩 Recent Rental Requests</h2>
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <Inbox className="w-5 h-5 text-blue-600" />
+            Recent Rental Requests
+          </h2>
           <Link
             href="/landlord/requests"
             className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1"
@@ -296,8 +303,13 @@ export default function LandlordDashboard() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-500">
-                      {request.tenant?.name || 'Tenant'} • {request.property?.city}
+                      {request.tenant?.name || 'Tenant'} • {request.property?.city || 'Unknown'}
                     </p>
+                    {request.message && (
+                      <p className="text-xs text-gray-400 mt-1 truncate max-w-md">
+                        "{request.message}"
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <span className="text-gray-400">
@@ -310,10 +322,27 @@ export default function LandlordDashboard() {
             })}
           </div>
         ) : (
-          <div className="bg-gray-50 rounded-2xl p-12 text-center border border-gray-200">
-            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No rental requests yet</p>
-            <p className="text-gray-400 text-sm">Requests will appear here when tenants apply</p>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-12 text-center border border-gray-200">
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Inbox className="w-8 h-8 text-blue-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700">No rental requests yet</h3>
+            <p className="text-gray-500 mt-2 max-w-md mx-auto">
+              When tenants request to rent your properties, they'll appear here instantly.
+            </p>
+            {properties.length === 0 ? (
+              <Link
+                href="/landlord/properties/create"
+                className="inline-block mt-4 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+              >
+                List Your First Property
+              </Link>
+            ) : (
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-400">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Your properties are ready to receive requests</span>
+              </div>
+            )}
           </div>
         )}
       </div>

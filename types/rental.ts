@@ -11,7 +11,7 @@ export interface RentalRequest {
   createdAt: string;
   updatedAt: string;
   property?: Property;
-  payment?: Payment;
+  payment?: Payment | null;
   tenant?: {
     id: string;
     name: string;

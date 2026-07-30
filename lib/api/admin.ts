@@ -1,3 +1,4 @@
+// lib/api/admin.ts
 import apiClient from './client';
 import { User, UserStatus } from '@/types/user';
 import { Property } from '@/types/property';
