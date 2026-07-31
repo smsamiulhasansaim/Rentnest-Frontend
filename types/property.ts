@@ -53,6 +53,23 @@ export interface PropertyFilters {
   limit?: number;
 }
 
+export interface CreatePropertyData {
+  title: string;
+  description: string;
+  address: string;
+  city: string;
+  price: number;
+  bedrooms: number;
+  bathrooms: number;
+  amenities: string[];
+  images: string[];
+  categoryId: string;
+}
+
+export interface UpdatePropertyData extends Partial<CreatePropertyData> {
+  status?: Property['status'];
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;

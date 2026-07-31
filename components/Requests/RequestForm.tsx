@@ -23,6 +23,23 @@ export const RequestForm = ({ propertyId }: RequestFormProps) => {
       return;
     }
 
+    const getErrorMessage = (error: unknown): string => {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const response = (error as { response?: { data?: { message?: string } } }).response;
+
+        if (
+          response?.data &&
+          typeof response.data === 'object' &&
+          'message' in response.data &&
+          typeof response.data.message === 'string'
+        ) {
+          return response.data.message;
+        }
+      }
+
+      return 'Failed to submit request';
+    };
+
     mutate(
       {
         propertyId,
@@ -35,8 +52,8 @@ export const RequestForm = ({ propertyId }: RequestFormProps) => {
           setMoveInDate('');
           setMessage('');
         },
-        onError: (error: any) => {
-          toast.error(error?.response?.data?.message || 'Failed to submit request');
+        onError: (error: unknown) => {
+          toast.error(getErrorMessage(error));
         },
       }
     );
