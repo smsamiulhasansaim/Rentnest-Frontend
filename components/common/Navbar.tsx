@@ -17,6 +17,8 @@ import {
   Bell,
   UserCircle,
   ChevronDown,
+  Inbox,
+  PlusCircle,
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -40,6 +42,7 @@ export const Navbar = () => {
     logout();
     router.push('/');
     setIsDropdownOpen(false);
+    setIsMenuOpen(false);
   };
 
   const navLinks = [
@@ -60,6 +63,37 @@ export const Navbar = () => {
         return '/dashboard';
     }
   };
+
+  // Role-based navigation items
+  const getRoleBasedLinks = () => {
+    if (!user) return [];
+
+    switch (user.role) {
+      case 'TENANT':
+        return [
+          { href: '/tenant/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { href: '/tenant/rentals', label: 'My Rentals', icon: Building2 },
+          { href: '/tenant/payments', label: 'Payments', icon: CreditCard },
+        ];
+      case 'LANDLORD':
+        return [
+          { href: '/landlord/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { href: '/landlord/properties', label: 'My Properties', icon: Building2 },
+          { href: '/landlord/requests', label: 'Requests', icon: Inbox },
+          { href: '/landlord/properties/create', label: 'Add Property', icon: PlusCircle },
+        ];
+      case 'ADMIN':
+        return [
+          { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { href: '/admin/users', label: 'Users', icon: User },
+          { href: '/admin/properties', label: 'Properties', icon: Building2 },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const roleLinks = getRoleBasedLinks();
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -120,6 +154,7 @@ export const Navbar = () => {
                           onClick={() => setIsDropdownOpen(false)}
                         />
                         <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                          {/* User Info */}
                           <div className="px-4 py-3 border-b border-gray-100">
                             <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                             <p className="text-xs text-gray-500 truncate">{user?.email}</p>
@@ -128,47 +163,48 @@ export const Navbar = () => {
                             </span>
                           </div>
 
-                          <Link
-                            href={getDashboardLink()}
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            <LayoutDashboard className="w-4 h-4" />
-                            Dashboard
-                          </Link>
-
-                          {user?.role === 'TENANT' && (
-                            <>
-                              <Link
-                                href="/tenant/rentals"
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                onClick={() => setIsDropdownOpen(false)}
-                              >
-                                <Building2 className="w-4 h-4" />
-                                My Rentals
-                              </Link>
-                              <Link
-                                href="/tenant/payments"
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                onClick={() => setIsDropdownOpen(false)}
-                              >
-                                <CreditCard className="w-4 h-4" />
-                                Payments
-                              </Link>
-                            </>
-                          )}
-
-                          {user?.role === 'LANDLORD' && (
+                          {/* Role-based links in dropdown */}
+                          {roleLinks.map((link) => (
                             <Link
-                              href="/landlord/properties"
+                              key={link.href}
+                              href={link.href}
                               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                               onClick={() => setIsDropdownOpen(false)}
                             >
-                              <Building2 className="w-4 h-4" />
-                              My Properties
+                              <link.icon className="w-4 h-4" />
+                              {link.label}
+                            </Link>
+                          ))}
+
+                          {/* Divider if there are role links */}
+                          {roleLinks.length > 0 && (
+                            <div className="border-t border-gray-100 my-1" />
+                          )}
+
+                          {/* Quick Actions based on role */}
+                          {user?.role === 'LANDLORD' && (
+                            <Link
+                              href="/landlord/properties/create"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              <PlusCircle className="w-4 h-4" />
+                              List New Property
                             </Link>
                           )}
 
+                          {user?.role === 'TENANT' && (
+                            <Link
+                              href="/tenant/properties"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              <Search className="w-4 h-4" />
+                              Browse Properties
+                            </Link>
+                          )}
+
+                          {/* Logout */}
                           <button
                             onClick={handleLogout}
                             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
@@ -213,6 +249,7 @@ export const Navbar = () => {
         {isMenuOpen && mounted && (
           <div className="md:hidden py-4 border-t border-gray-100">
             <div className="flex flex-col gap-1">
+              {/* Main nav links */}
               {navLinks.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
@@ -229,28 +266,48 @@ export const Navbar = () => {
                 </Link>
               ))}
 
-              {isAuthenticated ? (
+              {isAuthenticated && (
                 <>
-                  <Link
-                    href={getDashboardLink()}
-                    className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-3"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LayoutDashboard className="w-5 h-5" />
-                    Dashboard
-                  </Link>
+                  <div className="border-t border-gray-100 my-2" />
+                  
+                  {/* Role-based mobile links */}
+                  {roleLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-3"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <link.icon className="w-5 h-5" />
+                      {link.label}
+                    </Link>
+                  ))}
+
+                  {/* Quick actions for mobile */}
+                  {user?.role === 'LANDLORD' && (
+                    <Link
+                      href="/landlord/properties/create"
+                      className="px-4 py-2.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-3"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <PlusCircle className="w-5 h-5" />
+                      List New Property
+                    </Link>
+                  )}
+
+                  <div className="border-t border-gray-100 my-2" />
+                  
                   <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
+                    onClick={handleLogout}
                     className="px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
                   >
                     <LogOut className="w-5 h-5" />
                     Logout
                   </button>
                 </>
-              ) : (
+              )}
+
+              {!isAuthenticated && (
                 <>
                   <Link
                     href="/auth/login"

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { rentalApi } from '@/lib/api/rentals';
 import { RentalRequest } from '@/types/rental';
 import {
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function MyRentalsPage() {
+  const router = useRouter();
   const [rentals, setRentals] = useState<RentalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('ALL');
@@ -69,6 +71,12 @@ export default function MyRentalsPage() {
       COMPLETED: 'Completed',
     };
     return labels[status] || status;
+  };
+
+  const handlePayNow = (e: React.MouseEvent, rentalId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/tenant/payments/create/${rentalId}`);
   };
 
   const filteredRentals = filter === 'ALL'
@@ -175,7 +183,9 @@ export default function MyRentalsPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
-                          <span className="text-gray-400">📍</span>
+                          <span className="text-gray-400">
+                            <Home className="w-4 h-4" />
+                          </span>
                           {rental.property?.city || 'N/A'}
                         </span>
                         <span className="text-gray-300">•</span>
@@ -195,13 +205,12 @@ export default function MyRentalsPage() {
                         </span>
                       )}
                       {rental.status === 'APPROVED' && !rental.payment && (
-                        <Link
-                          href={`/tenant/payments/create/${rental.id}`}
+                        <button
+                          onClick={(e) => handlePayNow(e, rental.id)}
                           className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-green-500/30 transition-all hover:scale-105"
-                          onClick={(e) => e.stopPropagation()}
                         >
                           Pay Now
-                        </Link>
+                        </button>
                       )}
                       <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-blue-50 transition-colors">
                         <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />

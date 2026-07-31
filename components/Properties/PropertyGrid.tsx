@@ -1,5 +1,6 @@
 'use client';
 
+import { Home } from 'lucide-react';
 import { Property } from '@/types/property';
 import PropertyCard from './PropertyCard';
 
