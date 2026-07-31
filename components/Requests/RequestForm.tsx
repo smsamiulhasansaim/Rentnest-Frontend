@@ -12,7 +12,7 @@ interface RequestFormProps {
 export const RequestForm = ({ propertyId }: RequestFormProps) => {
   const [moveInDate, setMoveInDate] = useState('');
   const [message, setMessage] = useState('');
-  const { toast } = useToast();
+  const toast = useToast();
   const { mutate, isPending } = useCreateRentalRequest();
 
   const handleSubmit = (e: React.FormEvent) => {
