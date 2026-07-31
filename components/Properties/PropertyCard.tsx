@@ -13,7 +13,7 @@ interface PropertyCardProps {
 export const PropertyCard = ({ property, variant = 'default' }: PropertyCardProps) => {
   const { id, title, price, city, address, bedrooms, bathrooms, images, status } = property;
 
-  // Fix: Use correct path based on variant
+  // Use correct path based on variant
   const href = variant === 'compact' 
     ? `/tenant/properties/${id}` 
     : `/tenant/properties/${id}`;

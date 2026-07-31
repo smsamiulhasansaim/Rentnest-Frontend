@@ -2,7 +2,7 @@ import apiClient from './client';
 import { Property, Category, PropertyFilters, ApiResponse, PaginatedResponse } from '@/types/property';
 
 export const propertyApi = {
-  // ============ PUBLIC APIs ============
+  // PUBLIC APIs 
   
   // Get all properties with filters
   getAll: async (filters?: PropertyFilters): Promise<PaginatedResponse<Property>> => {
@@ -31,7 +31,7 @@ export const propertyApi = {
     return response.data;
   },
 
-  // ============ LANDLORD APIs ============
+  // LANDLORD APIs 
   
   // Get all properties owned by the logged-in landlord
   getMyProperties: async (): Promise<ApiResponse<Property[]>> => {

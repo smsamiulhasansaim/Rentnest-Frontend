@@ -2,7 +2,7 @@ import apiClient from './client';
 import { RentalRequest, ApiResponse } from '@/types/rental';
 
 export const rentalApi = {
-  // ============ TENANT APIs ============
+  // TENANT APIs 
   
   // Create a rental request (Tenant)
   create: async (data: { 
@@ -26,7 +26,7 @@ export const rentalApi = {
     return response.data;
   },
 
-  // ============ LANDLORD APIs ============
+  // LANDLORD APIs 
   
   // Get all rental requests for landlord's properties
   getLandlordRequests: async (): Promise<ApiResponse<RentalRequest[]>> => {
