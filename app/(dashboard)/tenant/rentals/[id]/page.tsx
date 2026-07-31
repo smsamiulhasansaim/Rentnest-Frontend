@@ -23,7 +23,6 @@ import {
   XCircle,
   AlertCircle,
   CreditCard,
-  Building2,
   Star,
   MessageSquare,
   Sparkles,
@@ -177,6 +176,7 @@ export default function RentalRequestDetailsPage() {
   const StatusIcon = StatusConfig.icon;
   const canPay = rental.status === 'APPROVED' && !rental.payment;
   const canReview = rental.status === 'COMPLETED';
+  const payment = rental.payment;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -250,17 +250,17 @@ export default function RentalRequestDetailsPage() {
                 </div>
                 Payment Information
               </h2>
-              {rental.payment ? (
+              {payment ? (
                 <div className="space-y-2 bg-gray-50 rounded-xl p-4">
                   {/* Transaction ID */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-gray-200 gap-2">
                     <span className="text-gray-500 text-sm">Transaction ID</span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-sm text-gray-900 bg-white px-3 py-1 rounded-lg border border-gray-200 max-w-[140px] sm:max-w-[220px] truncate">
-                        {formatTransactionId(rental.payment.transactionId)}
+                        {formatTransactionId(payment.transactionId)}
                       </span>
                       <button
-                        onClick={() => copyToClipboard(rental.payment.transactionId)}
+                        onClick={() => copyToClipboard(payment.transactionId)}
                         className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0"
                         title="Copy full Transaction ID"
                       >
@@ -272,31 +272,31 @@ export default function RentalRequestDetailsPage() {
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Full ID - visible on desktop */}
                   <div className="text-xs text-gray-400 bg-gray-100 rounded-lg p-2 border border-gray-200 break-all hidden sm:block">
-                    <span className="font-mono">{rental.payment.transactionId}</span>
+                    <span className="font-mono">{payment.transactionId}</span>
                   </div>
-                  
+
                   <div className="flex justify-between py-2 border-b border-gray-200">
                     <span className="text-gray-500 text-sm">Amount</span>
-                    <span className="font-bold text-gray-900">${rental.payment.amount}</span>
+                    <span className="font-bold text-gray-900">${payment.amount}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-200">
                     <span className="text-gray-500 text-sm">Status</span>
                     <span className={`font-semibold ${
-                      rental.payment.status === 'COMPLETED' ? 'text-green-600' :
-                      rental.payment.status === 'PENDING' ? 'text-yellow-600' :
+                      payment.status === 'COMPLETED' ? 'text-green-600' :
+                      payment.status === 'PENDING' ? 'text-yellow-600' :
                       'text-red-600'
                     }`}>
-                      {rental.payment.status}
+                      {payment.status}
                     </span>
                   </div>
-                  {rental.payment.paidAt && (
+                  {payment.paidAt && (
                     <div className="flex justify-between py-2">
                       <span className="text-gray-500 text-sm">Paid At</span>
                       <span className="text-gray-900 text-sm">
-                        {new Date(rental.payment.paidAt).toLocaleString()}
+                        {new Date(payment.paidAt).toLocaleString()}
                       </span>
                     </div>
                   )}
@@ -433,7 +433,7 @@ export default function RentalRequestDetailsPage() {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Payment Completed</p>
                       <p className="text-xs text-gray-400">
-                        {rental.payment?.paidAt ? new Date(rental.payment.paidAt).toLocaleString() : 'N/A'}
+                        {payment?.paidAt ? new Date(payment.paidAt).toLocaleString() : 'N/A'}
                       </p>
                     </div>
                   </div>
