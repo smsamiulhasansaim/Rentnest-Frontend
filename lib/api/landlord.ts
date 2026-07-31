@@ -18,12 +18,14 @@ export const landlordApi = {
     return response.data;
   },
 
-  createProperty: async (data: Record<string, unknown>) => {
+  // Changed Record<string, unknown> to any for compatibility
+  createProperty: async (data: any) => {
     const response = await apiClient.post('/api/landlord/properties', data);
     return response.data;
   },
 
-  updateProperty: async (id: string, data: Record<string, unknown>) => {
+  // Changed Record<string, unknown> to any for compatibility
+  updateProperty: async (id: string, data: any) => {
     const response = await apiClient.put(`/api/landlord/properties/${id}`, data);
     return response.data;
   },
