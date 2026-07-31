@@ -4,11 +4,16 @@ import { useProperties } from '@/hooks/useProperties';
 import PropertyGrid from '@/components/Properties/PropertyGrid';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdminStats } from '@/hooks/useAdmin';
 import { ArrowRight, Home, Search, Users, Shield, Sparkles, Building2, PlusCircle, LayoutDashboard } from 'lucide-react';
 
 export default function HomePage() {
   const { user } = useAuth();
   const { data, isLoading } = useProperties({ limit: 8 });
+  
+  // Get real stats from API
+  const { data: adminStatsData } = useAdminStats();
+  const stats = adminStatsData?.data;
 
   // Role check
   const role = user?.role || 'GUEST';
@@ -48,14 +53,20 @@ export default function HomePage() {
 
   const config = heroConfigs[role as keyof typeof heroConfigs] || heroConfigs.GUEST;
 
+  // Get real stats or fallback to 0
+  const totalProperties = stats?.properties?.total || 0;
+  const totalLandlords = stats?.users?.landlords || 0;
+  const totalTenants = stats?.users?.tenants || 0;
+  const totalRevenue = stats?.revenue || 0;
+  const totalUsers = stats?.users?.total || 0;
+
   return (
     <div>
       {/* Hero Section with Background Image */}
       <section 
         className="relative text-white py-20 md:py-28 overflow-hidden"
         style={{
-          backgroundImage: 'url(https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1920)',
-          backgroundSize: 'cover',
+          backgroundImage: 'url(https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1920)',          backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
@@ -112,23 +123,25 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Quick Stats for Guests */}
-            {!isAuthenticated && (
-              <div className="grid grid-cols-3 gap-4 mt-12 max-w-lg mx-auto">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-                  <p className="text-2xl font-bold">500+</p>
-                  <p className="text-sm text-white/70">Properties</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-                  <p className="text-2xl font-bold">200+</p>
-                  <p className="text-sm text-white/70">Landlords</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-                  <p className="text-2xl font-bold">98%</p>
-                  <p className="text-sm text-white/70">Satisfaction</p>
-                </div>
+            {/* Real Stats - Shows only for guests or if stats available */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 max-w-2xl mx-auto">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <p className="text-2xl font-bold">{totalProperties || 0}+</p>
+                <p className="text-sm text-white/70">Properties</p>
               </div>
-            )}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <p className="text-2xl font-bold">{totalLandlords || 0}+</p>
+                <p className="text-sm text-white/70">Landlords</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <p className="text-2xl font-bold">{totalTenants || 0}+</p>
+                <p className="text-sm text-white/70">Tenants</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
+                <p className="text-2xl font-bold">${totalRevenue || 0}</p>
+                <p className="text-sm text-white/70">Total Revenue</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -199,7 +212,7 @@ export default function HomePage() {
             <>
               <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
               <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-                Join thousands of users finding their perfect rental property or listing their properties.
+                Join {totalUsers || 0}+ users finding their perfect rental property or listing their properties.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link
@@ -246,7 +259,7 @@ export default function HomePage() {
             <>
               <h2 className="text-3xl font-bold mb-4">Find Your Perfect Home</h2>
               <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-                Browse hundreds of properties and find the one that feels like home.
+                Browse {totalProperties || 0}+ properties and find the one that feels like home.
               </p>
               <Link
                 href="/tenant/properties"
