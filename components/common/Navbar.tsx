@@ -19,6 +19,9 @@ import {
   ChevronDown,
   Inbox,
   PlusCircle,
+  Tag,
+  Settings,
+  HelpCircle,
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -29,7 +32,6 @@ export const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Fix hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -87,13 +89,44 @@ export const Navbar = () => {
           { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
           { href: '/admin/users', label: 'Users', icon: User },
           { href: '/admin/properties', label: 'Properties', icon: Building2 },
+          { href: '/admin/categories', label: 'Categories', icon: Tag },
         ];
       default:
         return [];
     }
   };
 
+  const getRoleColor = () => {
+    if (!user) return 'from-blue-500 to-indigo-600';
+    switch (user.role) {
+      case 'TENANT':
+        return 'from-blue-500 to-indigo-600';
+      case 'LANDLORD':
+        return 'from-green-500 to-emerald-600';
+      case 'ADMIN':
+        return 'from-red-500 to-rose-600';
+      default:
+        return 'from-blue-500 to-indigo-600';
+    }
+  };
+
+  const getRoleBadgeColor = () => {
+    if (!user) return 'bg-blue-50 text-blue-600';
+    switch (user.role) {
+      case 'TENANT':
+        return 'bg-blue-50 text-blue-600';
+      case 'LANDLORD':
+        return 'bg-green-50 text-green-600';
+      case 'ADMIN':
+        return 'bg-red-50 text-red-600';
+      default:
+        return 'bg-blue-50 text-blue-600';
+    }
+  };
+
   const roleLinks = getRoleBasedLinks();
+  const roleColor = getRoleColor();
+  const roleBadgeColor = getRoleBadgeColor();
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
@@ -101,7 +134,7 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+            <div className={`w-8 h-8 bg-gradient-to-r ${roleColor} rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all`}>
               <Home className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">
@@ -137,7 +170,7 @@ export const Navbar = () => {
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      <div className={`w-8 h-8 bg-gradient-to-r ${roleColor} rounded-full flex items-center justify-center text-white text-sm font-medium`}>
                         {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                       <span className="hidden sm:block text-sm font-medium text-gray-700">
@@ -158,7 +191,7 @@ export const Navbar = () => {
                           <div className="px-4 py-3 border-b border-gray-100">
                             <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                             <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                            <span className="inline-block mt-1 px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">
+                            <span className={`inline-block mt-1 px-2 py-0.5 ${roleBadgeColor} text-xs rounded-full font-medium`}>
                               {user?.role}
                             </span>
                           </div>
@@ -201,6 +234,17 @@ export const Navbar = () => {
                             >
                               <Search className="w-4 h-4" />
                               Browse Properties
+                            </Link>
+                          )}
+
+                          {user?.role === 'ADMIN' && (
+                            <Link
+                              href="/admin/dashboard"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              <LayoutDashboard className="w-4 h-4" />
+                              Admin Panel
                             </Link>
                           )}
 
@@ -270,6 +314,17 @@ export const Navbar = () => {
                 <>
                   <div className="border-t border-gray-100 my-2" />
                   
+                  {/* User info in mobile */}
+                  <div className="px-4 py-2">
+                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
+                    <span className={`inline-block mt-1 px-2 py-0.5 ${roleBadgeColor} text-xs rounded-full font-medium`}>
+                      {user?.role}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-gray-100 my-2" />
+                  
                   {/* Role-based mobile links */}
                   {roleLinks.map((link) => (
                     <Link
@@ -292,6 +347,28 @@ export const Navbar = () => {
                     >
                       <PlusCircle className="w-5 h-5" />
                       List New Property
+                    </Link>
+                  )}
+
+                  {user?.role === 'TENANT' && (
+                    <Link
+                      href="/tenant/properties"
+                      className="px-4 py-2.5 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-3"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Search className="w-5 h-5" />
+                      Browse Properties
+                    </Link>
+                  )}
+
+                  {user?.role === 'ADMIN' && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                      Admin Panel
                     </Link>
                   )}
 
