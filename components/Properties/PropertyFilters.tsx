@@ -2,20 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { useCategories } from '@/hooks/useProperties';
-import { PropertyFilters } from '@/types/property';
+import { PropertyFilters as PropertyFiltersType } from '@/types/property';
 import { Search, X } from 'lucide-react';
 
 interface PropertyFiltersProps {
-  onFilterChange: (filters: PropertyFilters) => void;
-  initialFilters?: PropertyFilters;
+  onFilterChange: (filters: PropertyFiltersType) => void;
+  initialFilters?: PropertyFiltersType;
 }
 
 export const PropertyFilters = ({ onFilterChange, initialFilters = {} }: PropertyFiltersProps) => {
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
-  const [filters, setFilters] = useState<PropertyFilters>(initialFilters);
+  const [filters, setFilters] = useState<PropertyFiltersType>(initialFilters);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleChange = (key: keyof PropertyFilters, value: string | number) => {
+  const handleChange = (key: keyof PropertyFiltersType, value: string | number) => {
     const newFilters = { ...filters, [key]: value || undefined };
     setFilters(newFilters);
   };
