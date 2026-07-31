@@ -52,11 +52,14 @@ interface RentalRequest {
   } | null;
 }
 
+type ActionType = 'APPROVED' | 'REJECTED' | 'COMPLETE' | null;
+
 export default function LandlordRequestsPage() {
   const toast = useToast();
   const [requests, setRequests] = useState<RentalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('ALL');
+  const [activeAction, setActiveAction] = useState<ActionType>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,6 +80,7 @@ export default function LandlordRequestsPage() {
   };
 
   const handleRespond = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    setActiveAction(status);
     setProcessingId(id);
     try {
       await landlordApi.respondToRequest(id, { status });
@@ -86,11 +90,13 @@ export default function LandlordRequestsPage() {
       const message = error?.response?.data?.message || 'Failed to respond';
       toast.error(message);
     } finally {
+      setActiveAction(null);
       setProcessingId(null);
     }
   };
 
   const handleComplete = async (id: string) => {
+    setActiveAction('COMPLETE');
     setProcessingId(id);
     try {
       await landlordApi.completeRental(id);
@@ -100,6 +106,7 @@ export default function LandlordRequestsPage() {
       const message = error?.response?.data?.message || 'Failed to complete rental';
       toast.error(message);
     } finally {
+      setActiveAction(null);
       setProcessingId(null);
     }
   };
@@ -259,10 +266,10 @@ export default function LandlordRequestsPage() {
                         <>
                           <button
                             onClick={() => handleRespond(request.id, 'APPROVED')}
-                            disabled={processingId === request.id}
+                            disabled={activeAction !== null && processingId === request.id}
                             className="px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-1"
                           >
-                            {processingId === request.id ? (
+                            {activeAction === 'APPROVED' && processingId === request.id ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
                               <CheckCircle className="w-4 h-4" />
@@ -271,10 +278,10 @@ export default function LandlordRequestsPage() {
                           </button>
                           <button
                             onClick={() => handleRespond(request.id, 'REJECTED')}
-                            disabled={processingId === request.id}
+                            disabled={activeAction !== null && processingId === request.id}
                             className="px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1"
                           >
-                            {processingId === request.id ? (
+                            {activeAction === 'REJECTED' && processingId === request.id ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
                               <XCircle className="w-4 h-4" />
@@ -287,10 +294,10 @@ export default function LandlordRequestsPage() {
                       {request.status === 'ACTIVE' && (
                         <button
                           onClick={() => handleComplete(request.id)}
-                          disabled={processingId === request.id}
+                          disabled={activeAction !== null && processingId === request.id}
                           className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-1"
                         >
-                          {processingId === request.id ? (
+                          {activeAction === 'COMPLETE' && processingId === request.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
                             <CheckCircle className="w-4 h-4" />

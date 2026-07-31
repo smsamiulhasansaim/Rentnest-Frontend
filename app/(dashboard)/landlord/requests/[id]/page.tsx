@@ -66,6 +66,8 @@ interface RequestDetail {
   } | null;
 }
 
+type ActionType = 'APPROVED' | 'REJECTED' | 'COMPLETE' | null;
+
 export default function RequestDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -74,7 +76,7 @@ export default function RequestDetailsPage() {
 
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
+  const [activeAction, setActiveAction] = useState<ActionType>(null);
 
   useEffect(() => {
     fetchRequest();
@@ -95,7 +97,7 @@ export default function RequestDetailsPage() {
   };
 
   const handleRespond = async (status: 'APPROVED' | 'REJECTED') => {
-    setProcessing(true);
+    setActiveAction(status);
     try {
       await landlordApi.respondToRequest(requestId, { status });
       toast.success(`Request ${status.toLowerCase()} successfully`);
@@ -106,12 +108,12 @@ export default function RequestDetailsPage() {
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Failed to respond';
       toast.error(message);
-      setProcessing(false);
+      setActiveAction(null);
     }
   };
 
   const handleComplete = async () => {
-    setProcessing(true);
+    setActiveAction('COMPLETE');
     try {
       await landlordApi.completeRental(requestId);
       toast.success('Rental marked as completed');
@@ -121,9 +123,11 @@ export default function RequestDetailsPage() {
       const message = error?.response?.data?.message || 'Failed to complete rental';
       toast.error(message);
     } finally {
-      setProcessing(false);
+      setActiveAction(null);
     }
   };
+
+  const isProcessing = activeAction !== null;
 
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { icon: any; color: string; label: string; bg: string }> = {
@@ -211,10 +215,10 @@ export default function RequestDetailsPage() {
                   <>
                     <button
                       onClick={() => handleRespond('APPROVED')}
-                      disabled={processing}
+                      disabled={isProcessing}
                       className="px-4 py-2 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
-                      {processing ? (
+                      {activeAction === 'APPROVED' ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <CheckCircle className="w-4 h-4" />
@@ -223,10 +227,10 @@ export default function RequestDetailsPage() {
                     </button>
                     <button
                       onClick={() => handleRespond('REJECTED')}
-                      disabled={processing}
+                      disabled={isProcessing}
                       className="px-4 py-2 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
-                      {processing ? (
+                      {activeAction === 'REJECTED' ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <XCircle className="w-4 h-4" />
@@ -238,10 +242,10 @@ export default function RequestDetailsPage() {
                 {request.status === 'ACTIVE' && (
                   <button
                     onClick={handleComplete}
-                    disabled={processing}
+                    disabled={isProcessing}
                     className="px-4 py-2 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 transition-colors disabled:opacity-50 flex items-center gap-2"
                   >
-                    {processing ? (
+                    {activeAction === 'COMPLETE' ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <CheckCircle className="w-4 h-4" />
@@ -390,7 +394,7 @@ export default function RequestDetailsPage() {
               </p>
             </div>
 
-            {/* View Property Link - FIXED: Goes to landlord property details */}
+            {/* View Property Link: Goes to landlord property details */}
             <Link
               href={`/landlord/properties/${request.property?.id}`}
               className="block w-full text-center px-6 py-3 bg-blue-50 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition-colors"
