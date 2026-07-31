@@ -7,8 +7,8 @@ import { QueryProvider } from '@/providers/QueryProvider';
 import ToastProvider from '@/providers/ToastProvider';
 
 export const metadata: Metadata = {
-  title: "Rentnest",
-  description: "Codex by Rentnest-Frontend",
+  title: "Rentnest || Find Your Dream Rental Property",
+  description: "Codex by S M Samiul Hasan || Find Your Dream Rental Property || Find Your Next Home || List Your Property & Earn || Admin Control Panel ",
 };
 
 export default function RootLayout({

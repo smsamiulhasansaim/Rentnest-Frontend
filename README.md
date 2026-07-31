@@ -353,7 +353,7 @@ This project is licensed under the MIT License.
 
 **S M Samiul Hasan**
 
-- GitHub: [@samiuldev](https://github.com/smsamiulhasansaim)
+- GitHub: [@smsamiulhasansaim](https://github.com/smsamiulhasansaim)
 - Email: hello.smsamiulhasan@gmail.com
 
 ---
@@ -367,4 +367,5 @@ This project is licensed under the MIT License.
 ---
 
 **Built with ❤️ S M SAMIUL HASAN using Next.js 16**
+
 ```
