@@ -49,7 +49,7 @@ export default function CreateReviewContent() {
         comment: comment.trim() || undefined,
       });
       toast.success('Review submitted successfully!');
-      router.push(`/properties/${propertyId}`);
+      router.push(`/tenant/properties/${propertyId}`);
     } catch (error: any) {
       toast.error(error?.message || 'Failed to submit review');
     }
