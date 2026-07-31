@@ -54,7 +54,7 @@ export default function HomePage() {
       <section 
         className="relative text-white py-20 md:py-28 overflow-hidden"
         style={{
-          backgroundImage: 'url(https://pixabay.com/images/download/darkmoon_art-house-2098115_1920.jpg)',
+          backgroundImage: 'url(https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1920)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

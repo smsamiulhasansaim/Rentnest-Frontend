@@ -1,51 +1,57 @@
 import Link from "next/link";
+import { Home, Search, Building2, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen w-full bg-[#fdfbf7] flex items-center justify-center px-6 py-20">
+    <main className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-6 py-20">
       <div className="w-full max-w-lg text-center">
-        {/* Hotel/key icon */}
-        <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#f6ecd9] border border-[#e3cd9c]">
-          <svg
-            className="h-10 w-10 text-[#b9902f]"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 21h18M5 21V7a2 2 0 012-2h10a2 2 0 012 2v14M9 21v-4a1 1 0 011-1h4a1 1 0 011 1v4M9 9h.01M9 12h.01M15 9h.01M15 12h.01"
-            />
-          </svg>
+        {/* Property/Home Icon */}
+        <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-blue-50 border border-blue-100 shadow-lg">
+          <Building2 className="h-12 w-12 text-blue-500" strokeWidth={1.5} />
         </div>
 
-        <p className="text-sm font-semibold tracking-[0.15em] text-[#b9902f] mb-2">
-          ERROR 404
+        <p className="text-sm font-semibold tracking-[0.15em] text-blue-500 mb-3">
+          404 - PAGE NOT FOUND
         </p>
 
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-          This room doesn&apos;t exist
+          Property Not Found
         </h1>
 
-        <p className="text-gray-500 mb-10 leading-relaxed">
-          The reservation or page you&apos;re looking for may have been fully
-          booked, removed, or the link might be broken.
+        <p className="text-gray-500 mb-10 leading-relaxed max-w-sm mx-auto">
+          The property or page you&apos;re looking for may have been removed,
+          is no longer available, or the link might be broken.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#c9a13b] to-[#b9902f] px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-[#c9a13b]/30 hover:from-[#b9902f] hover:to-[#a67e28] transition-all w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 transition-all w-full sm:w-auto"
           >
+            <Home className="w-4 h-4" />
             Back to Home
           </Link>
           <Link
-            href="/hotels"
-            className="inline-flex items-center justify-center rounded-full border border-[#e3cd9c] px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-[#f6ecd9] transition-colors w-full sm:w-auto"
+            href="/tenant/properties"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-gray-200 px-8 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all w-full sm:w-auto"
           >
-            Browse Hotels
+            <Search className="w-4 h-4" />
+            Browse Properties
+          </Link>
+        </div>
+
+        {/* Quick Action Links */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400">
+          <Link href="/auth/login" className="hover:text-gray-600 transition-colors">
+            Login
+          </Link>
+          <span className="text-gray-300">•</span>
+          <Link href="/auth/register" className="hover:text-gray-600 transition-colors">
+            Register
+          </Link>
+          <span className="text-gray-300">•</span>
+          <Link href="/landlord/properties/create" className="hover:text-gray-600 transition-colors">
+            List Property
           </Link>
         </div>
       </div>
