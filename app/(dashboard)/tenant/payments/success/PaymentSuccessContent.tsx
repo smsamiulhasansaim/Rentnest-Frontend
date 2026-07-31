@@ -46,8 +46,7 @@ export default function PaymentSuccessContent() {
 
   const confirmPayment = async () => {
     try {
-      const response = await paymentApi.confirm(sessionId!);
-      console.log('Payment confirmed:', response);
+      await paymentApi.confirm(sessionId!);
       setSuccess(true);
       toast.success('Payment confirmed successfully! 🎉');
     } catch (err: any) {
