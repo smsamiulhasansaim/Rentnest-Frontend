@@ -14,7 +14,7 @@ RentNest is a complete rental property marketplace application where:
 - **Admins** can oversee the entire platform, manage users, and moderate content
 
 > 💡 **Note**: This is a **frontend-only** application. It consumes a REST API backend.
-
+6
 ---
 
 ## ✨ Features
